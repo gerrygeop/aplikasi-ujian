@@ -1,6 +1,11 @@
 <?php
 
+use App\Http\Controllers\CourseController;
+use App\Http\Controllers\CourseQuestionController;
+use App\Http\Controllers\CourseStudentController;
+use App\Http\Controllers\LearningController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\StudentAnswerController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -15,6 +20,54 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::prefix('dashboard')->name('dashboard.')->group(function () {
+        Route::resource('courses', CourseController::class)->middleware('role:teacher');
+
+        Route::get('/courses/question/create/{course}', [CourseQuestionController::class, 'create'])
+            ->middleware('role:teacher')
+            ->name('courses.create.question');
+
+        Route::post('/courses/question/store/{course}', [CourseQuestionController::class, 'store'])
+            ->middleware('role:teacher')
+            ->name('courses.create.question.store');
+
+        Route::resource('course_questions', CourseQuestionController::class)
+            ->middleware('role:teacher');
+
+        Route::get('/courses/students/all/{course}', [CourseStudentController::class, 'index'])
+            ->middleware('role:teacher')
+            ->name('courses.course_student.index');
+
+        Route::get('/courses/students/create/{course}', [CourseStudentController::class, 'create'])
+            ->middleware('role:teacher')
+            ->name('courses.course_student.create');
+
+        Route::post('/courses/students/store/{course}', [CourseStudentController::class, 'store'])
+            ->middleware('role:teacher')
+            ->name('courses.course_student.store');
+
+        Route::get('/learning/finished/{course}', [LearningController::class, 'learning_finished'])
+            ->middleware('role:student')
+            ->name('learning.finished.course');
+
+        Route::get('/learning/raport/{course}', [LearningController::class, 'learning_raport'])
+            ->middleware('role:student')
+            ->name('learning.raport.course');
+
+        // Menampilkan beberapa kelas yang diberikan oleh guru
+        Route::get('/learning', [LearningController::class, 'index'])
+            ->middleware('role:student')
+            ->name('learning.index');
+
+        Route::get('/learning/{course}/{question}', [LearningController::class, 'learning'])
+            ->middleware('role:student')
+            ->name('learning.course');
+
+        Route::post('/learning/{course}/{question}', [StudentAnswerController::class, 'store'])
+            ->middleware('role:student')
+            ->name('learning.course.answer.store');
+    });
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
