@@ -1,47 +1,54 @@
 <x-guest-layout>
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
 
-    <form method="POST" action="{{ route('login') }}">
-        @csrf
+	<div class="left-side min-h-screen flex flex-col w-full pb-[30px] pt-[82px]">
+		<div class="h-full w-full flex items-center justify-center">
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
+			<form action="{{ route('login') }}" method="POST" class="flex flex-col gap-[30px] w-[450px] shrink-0">
+				@csrf
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
+				<h1 class="font-bold text-2xl leading-9">Login</h1>
 
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
+				<div class="flex flex-col gap-2">
+					<p class="font-semibold">Email Address</p>
+					<div
+						class="flex items-center w-full h-[52px] p-[14px_16px] rounded-full border border-[#EEEEEE] focus-within:border-1 focus:ring-0 focus-within:border-[#0A090B]">
+						<div class="mr-[14px] w-6 h-6 flex items-center justify-center overflow-hidden">
+							<img src="{{ asset('assets/images/icons/sms.svg') }}" class="h-full w-full object-contain" alt="icon">
+						</div>
+						<input type="email"
+							class="font-semibold placeholder:text-[#7F8190] placeholder:font-normal w-full outline-none focus:ring-0 border-0"
+							placeholder="Write your correct input here" name="email" value="{{ old('email') }}" required autofocus
+							autocomplete="email">
 
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
+					</div>
+					<x-input-error :messages="$errors->get('email')" class="mt-1" />
+				</div>
 
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
-            </label>
-        </div>
+				<div class="flex flex-col gap-2">
+					<p class="font-semibold">Password</p>
+					<div
+						class="flex items-center w-full h-[52px] p-[14px_16px] rounded-full border border-[#EEEEEE] focus-within:border-1 focus-within:border-[#0A090B]">
+						<div class="mr-[14px] w-6 h-6 flex items-center justify-center overflow-hidden">
+							<img src="{{ asset('assets/images/icons/lock.svg') }}" class="h-full w-full object-contain" alt="icon">
+						</div>
 
-        <div class="flex items-center justify-end mt-4">
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
-                </a>
-            @endif
+						<input type="password"
+							class="font-semibold placeholder:text-[#7F8190] placeholder:font-normal w-full outline-none focus:ring-0 border-0"
+							placeholder="Write your correct input here" name="password" required>
+					</div>
 
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
-        </div>
-    </form>
+					<x-input-error :messages="$errors->get('password')" class="mt-2" />
+				</div>
+
+				<button type="submit"
+					class="w-full h-[52px] p-[14px_30px] bg-[#6436F1] rounded-full font-bold text-white transition-all duration-300 hover:shadow-[0_4px_15px_0_#6436F14D] text-center">
+					Login
+				</button>
+
+				<!-- Session Status -->
+				<x-auth-session-status class="my-4" :status="session('status')" />
+			</form>
+		</div>
+	</div>
+
 </x-guest-layout>
