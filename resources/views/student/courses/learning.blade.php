@@ -43,6 +43,16 @@
 				@endforeach
 			</div>
 
+			@if ($errors->any())
+				<div class="mx-[70px] mt-[30px] flex flex-col gap-5">
+					<ul>
+						@foreach ($errors->all() as $error)
+							<li class="text-red-500">{{ $error }}</li>
+						@endforeach
+					</ul>
+				</div>
+			@endif
+
 			<button type="submit"
 				class="w-fit p-[14px_40px] bg-[#6436F1] rounded-full font-bold text-sm text-white transition-all duration-300 hover:shadow-[0_4px_15px_0_#6436F14D] text-center align-middle">
 				Save & Next Question

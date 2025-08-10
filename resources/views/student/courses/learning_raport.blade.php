@@ -42,12 +42,12 @@
 		<div class="flex items-center">
 			@if ($passed)
 				<p
-					class="p-[16px_20px] rounded-[10px] bg-[#06BC65] font-bold text-lg text-white outline-[#06BC65] outline-dashed outline-[3px] outline-offset-[7px] mr-[10px]">
+					class="p-[16px_20px] rounded-[10px] bg-green-500 font-bold text-lg text-white outline-green-500 outline-dashed outline-[3px] outline-offset-[7px] mr-[10px]">
 					Passed
 				</p>
 			@else
 				<p
-					class="p-[16px_20px] rounded-[10px] bg-[#FD445E] font-bold text-lg text-white outline-[#FD445E] outline-dashed outline-[3px] outline-offset-[7px] mr-[10px]">
+					class="p-[16px_20px] rounded-[10px] bg-red-500 font-bold text-lg text-white outline-red-500 outline-dashed outline-[3px] outline-offset-[7px] mr-[10px]">
 					Not Passed
 				</p>
 			@endif
@@ -66,11 +66,13 @@
 
 				<div class="flex items-center gap-[14px]">
 					@if ($answer->answer == 'correct')
-						<p class="bg-[#06BC65] rounded-full p-[8px_20px] text-white font-semibold text-sm">
-							Success
+						<p class="bg-green-500 rounded-full p-[8px_20px] text-white font-semibold text-sm">
+							Correct
 						</p>
 					@else
-						<p class="bg-[#FD445E] rounded-full p-[8px_20px] text-white font-semibold text-sm">Failed</p>
+						<p class="bg-red-500 rounded-full p-[8px_20px] text-white font-semibold text-sm">
+							Wrong
+						</p>
 					@endif
 				</div>
 			</div>
