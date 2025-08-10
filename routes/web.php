@@ -24,6 +24,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
         Route::resource('courses', CourseController::class)->middleware('role:teacher');
 
+        // Course Questions
         Route::get('/courses/question/create/{course}', [CourseQuestionController::class, 'create'])
             ->middleware('role:teacher')
             ->name('courses.create.question');
@@ -33,8 +34,10 @@ Route::middleware('auth')->group(function () {
             ->name('courses.create.question.store');
 
         Route::resource('course_questions', CourseQuestionController::class)
-            ->middleware('role:teacher');
+            ->middleware('role:teacher')
+            ->only(['edit', 'update', 'destroy']);
 
+        // Course Student
         Route::get('/courses/students/all/{course}', [CourseStudentController::class, 'index'])
             ->middleware('role:teacher')
             ->name('courses.course_student.index');
@@ -47,6 +50,7 @@ Route::middleware('auth')->group(function () {
             ->middleware('role:teacher')
             ->name('courses.course_student.store');
 
+        // Learning
         Route::get('/learning/finished/{course}', [LearningController::class, 'learning_finished'])
             ->middleware('role:student')
             ->name('learning.finished.course');
