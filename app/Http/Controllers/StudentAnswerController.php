@@ -6,29 +6,14 @@ use App\Models\Course;
 use App\Models\CourseAnswer;
 use App\Models\CourseQuestion;
 use App\Models\StudentAnswer;
+use App\Models\StudentResults;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 class StudentAnswerController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
     /**
      * Store a newly created resource in storage.
      */
@@ -52,9 +37,9 @@ class StudentAnswerController extends Controller
         DB::beginTransaction();
 
         try {
-            $selectedAnswer = CourseAnswer::find($validated['answer_id']);
+            $selectedAnswer = CourseAnswer::findOrFail($validated['answer_id']);
 
-            $existingAnswer = StudentAnswer::where('user_id', Auth::id())
+            $existingAnswer = StudentAnswer::where('user_id', auth()->id())
                 ->where('course_question_id', $question->id)
                 ->first();
 
@@ -62,12 +47,10 @@ class StudentAnswerController extends Controller
                 return redirect()->back()->withErrors(['answer_id' => 'Anda sudah menjawab pertanyaan ini!'])->withInput();
             }
 
-            $answerValue = $selectedAnswer->is_correct ? 'correct' : 'wrong';
-
             StudentAnswer::create([
-                'user_id' => Auth::id(),
+                'user_id' => auth()->id(),
                 'course_question_id' => $question->id,
-                'answer' => $answerValue
+                'answer' => $selectedAnswer->is_correct ? 'correct' : 'wrong'
             ]);
 
             DB::commit();
@@ -78,48 +61,86 @@ class StudentAnswerController extends Controller
                 ->first();
 
             if ($nextQuestion) {
-                return redirect()->route('dashboard.learning.course', ['course' => $course, 'question' => $nextQuestion]);
+                return redirect()->route('dashboard.learning.course', [
+                    'course' => $course,
+                    'question' => $nextQuestion
+                ]);
             } else {
-                return redirect()->route('dashboard.learning.finished.course', $course);
+                // return redirect()->route('dashboard.learning.finished.course', $course);
+                return $this->processFinalResult($course);
             }
         } catch (\Exception $e) {
             DB::rollBack();
-            throw ValidationException::withMessages([
+            Log::error("Gagal menyimpan jawaban user " . auth()->id() . ": " . $e->getMessage());
+
+            $error = ValidationException::withMessages([
                 'system_error' => ['System Error: Gagal menyimpan jawaban! ' . $e->getMessage()],
             ]);
+            dd($error);
+            throw $error;
         }
     }
 
-
     /**
-     * Display the specified resource.
+     * Proses hitung nilai dan simpan hasil akhir ke tabel student_results.
+     * Ini dipanggil hanya setelah user menyelesaikan semua soal.
+     *
+     * @param Course $course
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws ValidationException
      */
-    public function show(StudentAnswer $studentAnswer)
+    private function processFinalResult(Course $course)
     {
-        //
-    }
+        $userId = auth()->id();
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(StudentAnswer $studentAnswer)
-    {
-        //
-    }
+        // 1. Dapatkan total pertanyaan dan total jawaban yang diberikan user
+        $totalQuestions = $course->questions()->count();
+        $totalUserAnswers = StudentAnswer::where('user_id', $userId)
+            ->whereIn('course_question_id', $course->questions()->pluck('id'))
+            ->count();
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, StudentAnswer $studentAnswer)
-    {
-        //
-    }
+        // 2. Hitung jumlah jawaban yang benar
+        $correctAnswersCount = StudentAnswer::where('user_id', $userId)
+            ->whereIn('course_question_id', $course->questions()->pluck('id'))
+            ->where('answer', 'correct')
+            ->count();
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(StudentAnswer $studentAnswer)
-    {
-        //
+        // 3. Hitung persentase dan status lulus
+        $passingPercentage = 0.60;
+        $scorePercentage = ($totalQuestions > 0) ? ($correctAnswersCount / $totalQuestions) * 100 : 0;
+        $isPassed = $scorePercentage >= ($passingPercentage * 100);
+
+        // 4. Simpan hasil akhir ke tabel student_results
+        DB::beginTransaction();
+        try {
+            StudentResults::updateOrCreate(
+                [
+                    'user_id' => $userId,
+                    'course_id' => $course->id
+                ],
+                [
+                    'total_questions' => $totalQuestions,
+                    'total_answered' => $totalUserAnswers,
+                    'total_correct' => $correctAnswersCount,
+                    'score_percentage' => $scorePercentage,
+                    'is_passed' => $isPassed,
+                    'completed_at' => now()
+                ]
+            );
+
+            DB::commit();
+
+            // Redirect ke halaman selesai kursus
+            return redirect()->route('dashboard.learning.finished.course', $course);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("Gagal menyimpan hasil tes user " . $userId . ": " . $e->getMessage());
+
+            $error = ValidationException::withMessages([
+                'system_error' => ['Terjadi kesalahan sistem saat menyimpan hasil.']
+            ]);
+            dd($error->errors());
+            throw $error; // Re-throw untuk penanganan lebih lanjut jika perlu
+        }
     }
 }

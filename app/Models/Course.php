@@ -32,4 +32,9 @@ class Course extends Model
     {
         return 'slug';
     }
+
+    public function results()
+    {
+        return $this->hasMany(StudentResults::class);
+    }
 }

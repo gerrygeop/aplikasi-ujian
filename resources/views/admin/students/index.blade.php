@@ -63,43 +63,43 @@
 								alt="photo">
 						</div>
 						<div class="flex flex-col gap-[2px]">
-							<p class="font-bold text-lg">Angga Parralax</p>
-							<p class="text-[#7F8190]">angga@student.sg.com:</p>
+							<p class="font-bold text-lg">
+								{{ $student->name }}
+							</p>
+							<p class="text-[#7F8190]">
+								{{ $student->email }}
+							</p>
 						</div>
 					</div>
 					<div class="flex items-center gap-[14px]">
-						<p
-							class="p-[6px_10px] rounded-[10px] bg-[#06BC65] font-bold text-xs text-white outline-[#06BC65] outline-dashed outline-[2px] outline-offset-[4px] mr-[6px]">
-							Passed</p>
+						@if (is_null($student->result) || is_null($student->result->completed_at))
+							<p
+								class="p-[6px_10px] rounded-[10px] bg-slate-500 font-bold text-xs text-white outline-slate-500 outline-dashed outline-[2px] outline-offset-[4px] mr-[6px]">
+								Not Completed
+							</p>
+						@else
+							@if ($student->result->is_passed)
+								<p
+									class="p-[6px_10px] rounded-[10px] bg-green-500 font-bold text-xs text-white outline-green-500 outline-dashed outline-[2px] outline-offset-[4px] mr-[6px]">
+									Passed
+								</p>
+							@else
+								<p
+									class="p-[6px_10px] rounded-[10px] bg-red-500 font-bold text-xs text-white outline-red-500 outline-dashed outline-[2px] outline-offset-[4px] mr-[6px]">
+									Failed
+								</p>
+							@endif
+						@endif
 					</div>
 				</div>
 
 			@empty
 				<div class="student-card w-full flex items-center justify-between p-4 border border-[#EEEEEE] rounded-[20px]">
-					<div class="flex gap-4 items-center">
-						<div class="flex flex-col gap-[2px]">
-							<p class="text-[#7F8190]">Empty</p>
-						</div>
+					<div class="flex items-center">
+						<p class="text-[#7F8190]">Belum ada siswa yang terdaftar di kursus ini.</p>
 					</div>
 				</div>
 			@endforelse
-
-			<div class="student-card w-full flex items-center justify-between p-4 border border-[#EEEEEE] rounded-[20px]">
-				<div class="flex gap-4 items-center">
-					<div class="w-[50px] h-[50px] flex shrink-0 rounded-full overflow-hidden">
-						<img src="assets/images/photos/default-photo.svg" class="w-full h-full object-cover" alt="photo">
-					</div>
-					<div class="flex flex-col gap-[2px]">
-						<p class="font-bold text-lg">Angga Parralax</p>
-						<p class="text-[#7F8190]">angga@student.sg.com:</p>
-					</div>
-				</div>
-				<div class="flex items-center gap-[14px]">
-					<p
-						class="p-[6px_10px] rounded-[10px] bg-[#FD445E] font-bold text-xs text-white outline-[#FD445E] outline-dashed outline-[2px] outline-offset-[4px] mr-[6px]">
-						Not Passed</p>
-				</div>
-			</div>
 
 		</div>
 	</div>

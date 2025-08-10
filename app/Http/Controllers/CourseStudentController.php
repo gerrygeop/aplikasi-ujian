@@ -16,10 +16,19 @@ class CourseStudentController extends Controller
      */
     public function index(Course $course)
     {
-        $course->load(['category', 'students']);
+        $course->load(['category', 'students', 'results']);
+
+        $students = $course->students->map(function ($student) use ($course) {
+            $result = $course->results->firstWhere('user_id', $student->id);
+
+            $student->result = $result;
+
+            return $student;
+        });
 
         return view('admin.students.index', [
             'course' => $course,
+            'students' => $students,
         ]);
     }
 
@@ -80,37 +89,5 @@ class CourseStudentController extends Controller
 
             throw $error;
         }
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(CourseStudent $courseStudent)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(CourseStudent $courseStudent)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, CourseStudent $courseStudent)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(CourseStudent $courseStudent)
-    {
-        //
     }
 }
