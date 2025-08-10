@@ -27,4 +27,9 @@ class Course extends Model
     {
         return $this->belongsToMany(User::class, 'course_students', 'course_id', 'user_id');
     }
+
+    public function getRouteKeyName()
+    {
+        return 'slug';
+    }
 }
